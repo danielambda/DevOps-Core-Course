@@ -115,5 +115,5 @@ jobs:
           context: ./app_python
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/app-python:${{ env.VERSION }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/app-python:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/app_python:${{ env.VERSION }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/app_python:latest
