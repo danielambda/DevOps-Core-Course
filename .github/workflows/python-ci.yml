@@ -1,0 +1,101 @@
+name: Python CI Pipeline
+
+on:
+  push:
+    paths:
+      - "app_python/**"
+      - ".github/workflows/python-ci.yml"
+  pull_request:
+    paths:
+      - "app_python/**"
+      - ".github/workflows/python-ci.yml"
+
+# GitHub cancels older runs when a newer one starts in the same group
+concurrency:
+  group: python-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install dependencies
+        working-directory: app_python
+        run: |
+          pip install -r requirements.txt
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          pip install flake8
+
+      - name: Run linter (flake8)
+        working-directory: app_python
+        run: flake8 .
+
+      - name: Run unit tests
+        working-directory: app_python
+        run: pytest -v
+
+  security:
+    name: Snyk Security Scan
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        working-directory: app_python
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run Snyk scan
+        uses: snyk/actions/python@v1
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          args: --severity-threshold=high
+
+  docker:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Generate CalVer version
+        run: echo "VERSION=$(date +'%Y.%m')" >> $GITHUB_ENV
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./app_python
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/app-python:${{ env.VERSION }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/app-python:latest

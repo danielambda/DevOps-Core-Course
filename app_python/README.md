@@ -164,3 +164,18 @@ After pulling, the container can be started the same way as a locally built imag
 * The container runs as a **non-root user** for improved security.
 * The containerized application behaves the same as when run locally.
 * Docker ensures consistent execution across environments.
+
+
+## Running Tests
+
+Tests are written using pytest.
+
+### Install dependencies
+```bash
+pip install -r requirements.txt -r requirements-dev.txt
+```
+
+### Run tests
+```bash
+pytest -v
+```
