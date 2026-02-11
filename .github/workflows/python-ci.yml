@@ -70,7 +70,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --severity-threshold=high
+          args: --severity-threshold=high app_python
 
   docker:
     name: Build & Push Docker Image
