@@ -1,3 +1,4 @@
+![Python CI Pipeline](https://github.com/danielambda/DevOps-Core-Course/actions/workflows/python-ci.yml/badge.svg)
 # DevOps Info Service
 
 
