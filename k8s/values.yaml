@@ -1,0 +1,80 @@
+replicaCount: 5
+
+image:
+  repository: danielambda/devops-app
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 80
+  targetPort: 8000
+
+environment: "prod"
+logLevel: "info"
+
+deployment:
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
+rollout:
+  strategy: canary
+  blueGreen:
+    autoPromotionEnabled: false
+    autoPromotionSeconds: null
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 2
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 3
+  timeoutSeconds: 2
+  failureThreshold: 3
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Lab 11: Kubernetes Secrets (use placeholders; override at install time)
+secrets:
+  enabled: true
+  username: "changeme-user"
+  password: "changeme-password"
+  envFrom: true
+
+# Lab 11: HashiCorp Vault Agent Injector (enable after Vault is installed and configured)
+vault:
+  enabled: false
+  role: my-python-app
+  secretPath: secret/data/myapp/config
+  template:
+    enabled: false
+  serviceAccount:
+    create: true
+    name: ""
+
+podAnnotations: {}
+
+persistence:
+  enabled: true
+  size: 100Mi
+  storageClass: ""
