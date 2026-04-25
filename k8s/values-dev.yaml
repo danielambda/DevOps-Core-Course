@@ -1,0 +1,29 @@
+replicaCount: 1
+
+workload:
+  kind: statefulset
+
+image:
+  tag: latest
+
+service:
+  type: NodePort
+
+environment: "dev"
+logLevel: "debug"
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+livenessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+readinessProbe:
+  initialDelaySeconds: 3
+  periodSeconds: 5
