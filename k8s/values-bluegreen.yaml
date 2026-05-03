@@ -1,0 +1,8 @@
+workload:
+  kind: rollout
+
+rollout:
+  strategy: blueGreen
+  blueGreen:
+    autoPromotionEnabled: false
+    autoPromotionSeconds: null
